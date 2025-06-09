@@ -46,6 +46,13 @@ class WstunnelGUIApp(QMainWindow):
 
         status_layout.addWidget(self.status_label, 1)
         status_layout.addWidget(self.activate_button)
+       
+        label_server = QLabel("Server Address:")
+        layout.addWidget(label_server)
+
+        self.server_address = QLineEdit()
+        self.server_address.setPlaceholderText("e.g., wss://wstunnel.example.com:8080")
+        layout.addWidget(self.server_address)
 
         main_layout.addWidget(status_panel)
 
@@ -170,7 +177,22 @@ class WstunnelGUIApp(QMainWindow):
         self.activate_button.setText("Activate")
 
         QMessageBox.information(self, "Connection Stopped", "Connection deactivated")
-
+        def activate_tunnel(self):
+            port = self.port_input.text()
+            address = self.server_address.text()
+            if port and address:
+                if self.server_radio.isChecked():
+                    command = ["wstunnel", "server", f"wss://0.0.0.0:{port}"]
+                else:
+                    command = ["wstunnel", "client", "-L", f"tcp://127.0.0.1:{port}", f"wss://{address}"]
+                try:
+                    subprocess.run(command, check=True)
+                    self.status_label.setText("Connected!")
+                except subprocess.CalledProcessError:
+                    self.status_label.setText("Connection failed!")
+            else:
+                self.status_label.setText("Please enter port and address!")
+   
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
